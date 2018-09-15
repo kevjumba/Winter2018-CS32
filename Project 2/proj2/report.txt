@@ -1,0 +1,156 @@
+1. My implementation of this doubly linked list has both a tail and a head each pointing to the front and back of the linked list. Inserting always inserts to the rear of the linked list. The linked list is a regular chain with nodes containing a value, a pointer to the next node, and a pointer to the previous node. The linked list is not circular and has a queue order, in other words, the elements are ordered from earliest to latest inserted.
+
+2. Pseudocode
+
+Constructor: 
+The map constructor merely instantiates head and tail to null.
+
+empty() and size(): 
+I keep track of m_size during insert and erase so these functions merely check or return m_size.
+
+Copy constructor:
+Create a new node pointer to the source(other) head.
+Reset head and tail to nullptr.
+Loop through the source linked list from head to tail and insert all nodes
+into the current Map then visiting the next node.
+
+Assignment operator:
+First check if the source has the same pointer as the current object and return if they are equal.
+Else declare iterator head and loop through current linked list from head to nullptr.
+Each iteration declare a temp pointer, make iterator point to next node and delete the temp node. 
+After all nodes in the linked list is deleted, reset head and tail to nullptr and loop through the source linked list and insert all encountered nodes.
+Finally return the object itself.
+
+Insert:
+First check edge case where there is no elements in list
+In this case, we create a new node that is assigned to both tail and head and assign all next and prev ptrs to null. 
+Otherwise, we can just add the node to the back of the array. 
+First we loop through the linked list to check if that particular key exists in the array.
+If it does not, we create a new node and insert it behind tail and reset tail to be that node, in the process rearranging the different pointers.
+
+insertorUpdate:
+For insert or update, we first check to see if the key exists in the linked list and if it does, setting the node-found’s new value to value.
+If the program exits the while loop, that means the key doesn’t exist so we just insert it using insert.
+
+Erase:
+Erase first loops through the linked list and breaks out if it finds a node with the key.
+If node at the end of the loop is nullptr, that means the node doesn’t exist.
+If it does exist, we check 4 cases.
+(1) node is the only node in the list, in which case we can just delete it and set head and tail to nullptr.
+(2) node is the head of list with more than 1 element. Then we set head to be the next node in line and set that node’s prev to nullptr
+(3) node is the tail of a list with more than 1 element. Then we set tail to be the previous node, set that node’s next to nullptr. 
+(4) node is just somewhere in the middle in which case, we just move the ptrs of next and prev of the the two adjacent nodes to skip over the node
+
+At the end we delete the said node and return.
+
+get(key, value):
+Using the same while loop referenced in previous functions, loop through entire array and find either nothing or a value and set the corresponding value.
+
+get(I, key, value):
+First it checks to see if I is out of bounds or that there is no elements in the linked list.
+If none of these are true then we loop until we hit the ith element in the linked list, and return key and value.
+
+Swap:
+Use assignment operator to swap other and map using a temp
+
+Update:
+Loop through the linked list and if key is found, we update the value of node with key key
+
+Contains:
+Loop through the linked list and if key is found, just return true.
+
+Combine:
+Loop through the first map m1 and checking if m2 has each of the keys we get from m1’s nodes, we check if the values are equal. If they are equal, insert it and if the values are not equal, set the return to false. 
+The second for loop does the opposite of the first loop but before insert into the resulting map, we check if the key is in the result already. Other logic is the same.
+
+Subtract:
+clear result by setting it equal to newMap
+Loop through m1 and get every key, check if this key is contained in m2. If it isn’t the key inserts into result. 
+
+Test cases:
+    Map m;
+    ValueType valueTemp;
+    KeyType keyTemp;
+    assert(m.empty());  //check if m is initialized to empty
+    assert(m.size() == 0); //check if m has size 0
+    assert(!m.erase("1")); //try erasing
+    assert(!m.contains("1"));
+    assert(m.insert("a", 1)); //insert with nothing inside
+    assert(m.contains("a")); //see if m contains a just inserted and check contains
+    assert(m.get("a", valueTemp)); //see if you actually can get 'a'
+    assert(valueTemp == 1); //check if get actually worked
+    assert(m.get(0, keyTemp, valueTemp)); //check get index
+    assert(keyTemp == "a"); //check if get index actually worked
+    assert(valueTemp == 1); //check if valueTemp was stored correctly
+    assert(m.erase("a")); //check if we can erase
+    assert(m.size()==0 && !m.contains("a")); //check if the erase actually erased it
+    assert(m.insert("a", 1)); //insert a again
+    assert(!m.insert("a", 1.2)); //try inserting the same a
+    assert(m.insert("b", 2)); //check if i can insert such that there is a head and tail
+    assert(m.insert("c", 3)); //now insert one such that there is one in the middle
+    assert(m.contains("b") && m.contains("c")); //check if they were inserted correctly
+    assert(m.insertOrUpdate("a", 2.3)); //check if we can insert
+    assert(m.insertOrUpdate("d", 3.4)); //check if insertions don't return false if it doesn't exist
+    assert(m.get("a", valueTemp));
+    assert(valueTemp==2.3);
+    assert(m.get("d", valueTemp));
+    assert(valueTemp==3.4);
+    Map m2;
+    m2 = m;
+    assert(m2.size() == 4 && m2.contains("a") && m2.contains("b") && m2.contains("c") && m2.contains("d")); //assert if everything copied over correctly using assignment operator
+    Map m3 = m;
+    assert(m3.size() == 4 && m3.contains("a") && m3.contains("b") && m3.contains("c") && m3.contains("d")); //assert if everything copied over when copy constructor using assignment
+    Map m4(m);
+    assert(m4.size() == 4 && m4.contains("a") && m4.contains("b") && m4.contains("c") && m4.contains("d")); //assert if everything copied over when copy constructor using default
+    
+    Map m5;
+    assert(m5.insert("1", 5));
+    assert(m5.insert("2", 6.2));
+    assert(m5.insert("3", 2.7));
+    assert(m5.insert("4", 3.2));
+    assert(m5.insert("5", 3.1));
+    m5.swap(m); //check swap
+    assert(m5.size() == 4 && m5.contains("a") && m5.contains("b") && m5.contains("c") && m5.contains("d")); //check if swap worked
+    
+    assert(m5.get("a", valueTemp)); //check if values in the swap are right
+    assert(valueTemp == 2.3);
+    assert(m5.get("b", valueTemp));
+    assert(valueTemp == 2);
+    assert(m.size() == 5 && m.contains("1") && m.contains("2") && m.contains("3") && m.contains("4") && m.contains("5")); //check if swap worked
+    assert(m.get("1", valueTemp)); //check if values in the swap are right
+    assert(valueTemp == 5);
+    assert(m.get("2", valueTemp));
+    assert(valueTemp == 6.2);
+    
+    Map map;
+    Map map1;
+    Map map2;
+    assert(map.insert("a", 1));
+    assert(map.insert("b", 2));
+    assert(map.insert("c", 3));
+    assert(map.insert("d", 4));
+    assert(map.insert("e", 5));
+    
+    assert(map1.insert("a", 1));
+    
+    subtract(map, map1, map2);  //test subtract
+    
+    assert(map2.contains("b"));  //check if the subtract command actually worked
+    assert(map2.contains("c"));
+    assert(map2.contains("d"));
+    assert(!map2.contains("a"));
+    assert(map2.get("b", valueTemp));
+    assert(valueTemp == 2);
+    assert(map1.update("a", 2)); //change a so that they are different in map1 and map
+    assert(map1.insert("b", 2)); //insert b so there is one that is the same in map1 and map
+    assert(map1.insert("f", 4));
+    assert(!combine(map, map1, map2)); //check if combine returns false
+    assert(!map2.contains("a")); //check if map doesn't contain a since there was 2 instances with different values
+    assert(map2.contains("b"));  //check if other normal cases of insert are contained
+    assert(map2.contains("c"));
+    assert(map2.contains("d"));
+    //assert(map2.contains("e"));
+    assert(map2.contains("f"));  //check if a key that's in m2 but not in m1 in inserted
+    assert(map2.get("f", valueTemp));
+
+

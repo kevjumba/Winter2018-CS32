@@ -1,0 +1,27 @@
+2.   R: 4C: 3
+     R: 3C: 3
+     R: 5C: 3
+     R: 5C: 2
+     R: 5C: 1
+     R: 6C: 1
+     R: 7C: 1
+     R: 8C: 1
+     R: 8C: 2
+     R: 6C: 3
+     R: 4C: 4
+     R: 4C: 5
+4.
+     R: 4C: 3
+     R: 4C: 4
+     R: 5C: 3
+     R: 3C: 3
+     R: 4C: 5
+     R: 6C: 3
+     R: 5C: 2
+     R: 4C: 6
+     R: 5C: 5
+     R: 5C: 1
+     R: 4C: 7
+     R: 6C: 5
+
+The reason we get different coordinates is because stack and queue implementations are completely different. Stack implementation is FILO(first in last out) while queue is LIFO(Last in First Out). Therefore, the stack implementation traverse one path until it gets to the end and then reverts back to check another lane in a depth first search pattern. The queue implementation on the other hand traverses in rings. In the above example, it traverses all available paths within 1 step of 4,3 before it goes into the 2nd ring and so on.

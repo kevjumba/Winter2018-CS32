@@ -1,0 +1,170 @@
+
+1.Descriptions of public members:
+Actor
+Constructor -> initializes the actor by initializing the graphObject with x, y coordinates, size, direction, and depth. Then we initialize a new pointer to the studentWorld, set the state to alive, and initialize a image_ID member. 
+
+getName() is a public member function available to all actors to give actor pointers the ability to identify themselves even under polymorphism. It just returns the image ID of the actor.
+
+getWorld() is a public member function available to all actors so that they can have access to the studentWorld class. It returns a pointer to the StudentWorld.
+
+setState(int state) Each actor has a state(either dead or alive) based on whether or not they should disappear from the screen. Set state sets the actors state. 
+
+getState() Each actor requires a getState() method to acquire information about the state of the actor. Get state returns the current state as an integer(0 is dead, 1 is alive).
+
+bool isDead() Each actor requires an isDead method to check the state and check if the actor is actually dead and should be removed. Return true if the actor is dead or false otherwise.
+
+virtual void sufferCollision(Actor * object) = 0: sufferCollision is implemented as a pure virtual function because the way an actor suffers a collision differs with different actors. There is no unified way of suffering a collision so there is no reason to declare it in Actor. 
+
+virtual void doSomething() = 0; doSomething is also pure virtual in actor because every different actor does something different on a tick. Actor doesn’t need a doSomething declaration since all actors are specified. 
+
+Virtual ~Actor(); Actor’s destructor is empty but it is virtual in order to allow other destructors to run in defined behavior in derived classes.
+
+Under all classes that are the most derived classes(not abstract) of Actor:
+
+virtual void sufferCollision(Actor * object); This sufferCollision method is implemented by all actors in different ways. It is passed in an actor pointer object, identifying the object it has collided with and based on what it is, the object performs certain actions. Making it virtual is just a stylistic choice to signify that this is overriding a virtual function.
+
+virtual doSomething(): All classes that are derived from actor that can be constructed must have a doSomething method that overrides the pure virtual functions of Actor. Each actor must do something when the game moves from tick to tick so each derived actor must implement its own doSomething(). Making it virtual is just a stylistic choice.
+
+virtual ~<class>() All classes have a virtual destructor. Since there are no pointers to destruct, the destructors are all empty besides the StudentWorld destructor that destructs the game itself and all the pointers in studentWorld. 
+
+NachenBlaster:
+
+Constructor -> uses the Actor constructor to initialize actor specific variables and initializes the private members hitpoints, cabbage_energy, and torpedoes. 
+int getHealth(): getHealth() is a public member function because it provides read access to the NachenBlaster’s health, used in StudentWorld when it needs to output the Nachenblaster’s health percentage to the screen.
+
+int getCabbages(): getCabbages is a public member function because StudentWorld requires read access to the number of cabbages the Nachenblaster has left to output to the status screen. 
+
+int getTorpedoes(); getTorpedoes is also a public member because of the same reason as above. Read access is required. 
+
+void doSomething(): 
+First it checks if the Nachenblaster’s hitpoints has become less than 0 and sets the corresponding state.Check if the Nachenblaster has 30 or more cabbage, if not give it one more cabbage. Nachenblaster then gets a key using the studentWorld function and tells the Nachenblaster to do the corresponding action(including firing and moving). 
+
+void sufferCollision(Actor * object): The Nachenblaster first checks to see if the object is dead to prevent double damage or counting. Then it checks to see if the incoming object is a spaceship, projectile, or a goodie and increments/decrements the private members of Nachenblaster accordingly. 
+
+Star:
+
+Constructor -> initialize star with all of the necessary private members of Actor and nothing else. 
+virtual void doSomething(): The star first checks if it is dead, then checks if it should be set to dead, and finally if those aren’t the case, moves one pixel to the left.
+
+virtual void sufferCollision(Actor * object): since star doesn’t actually do anything during collisions, the function is empty.
+
+Alien:
+Constructor -> initialize the alien with flightDirection, hitpoints, flightPlanLength, and travelSpeed on top of the regular Actor private members. The x and y coordinates are fed in using the spec(VIEW_WIDTH-1 and a random number between 0 and VIEW_HEIGHT-1).
+void fireProjectile(int name) -> Accessible to all Alien that fires the given projectile. Differentiates between turnip firing and flatulence torpedo firing and does different things based on what the object fired is. This is public because all derived classes require it to fire their projectiles.
+
+void setFlightDir(int direction) -> All aliens require a way to set their flight direction which is differentiated by -1 SW, 0 W, and 1 NW. Public because all aliens derived classes require access to this setter.
+
+int getFlightDir(); -> All aliens require this function to be public so that they can access their own flight direction. 
+
+int getFlightPlanLength(); 
+void setFlightPlanLength(int flightPlanLen); -> Set and getFlightPlanLength() are functions that get and set the aliens flightplanlength. All aliens require access to these functions since they need to know and create new flight plans for themselves.
+
+void setFlightSpeed(double flightSpeed);
+double getFlightSpeed(); -> Set and getFlightSpeed() methods are functions that allow aliens to set and get their currentFlightSpeed. All aliens require access to these functions since they need to know what their flight speed is in order to move and be able to update flight speeds if need be(smallgon smash).
+
+int getHitpoints();
+void setHitpoints(int hitpoints); -> Set and getHitpoints() methods are functions that allow aliens to get and set their hit points. This is important because all derived aliens require a way to access their hit points and update them when they change. 
+
+virtual void sufferCollision(Actor * object) = 0; -> Alien is derived from Actor but Alien is also an abstract class with a pure virtual sufferCollision because derived classes require a way to sufferCollisions but an actual Alien object is not required. All alien objects in the game that are constructed should be derived from Alien. The differentiation between each alien, is the way they die, so each alien has to implement its own sufferCollision method.
+
+virtual void doSomething() = 0; -> The same logic holds for doSomething(). It is pure virtual because the Alien object itself doesn’t need to be constructed but all Alien derived objects must have a doSomething method with different instructions based on what Alien object they are. 
+
+Smallgon:
+
+Constructor -> Obtains the level from the construction parameters and initializes the hit points to 5*(1+(level-1)*(0.1). All other private members are sent to alien using the guidelines specified in the spec. 
+
+Virtual void doSomething() -> Smallgons override the pure virtual doSomething() function. First it checks if it is dead or whether or not it should be dead. Then it calls the StudentWorld’s dealWithCollisions method and checks if it is dead again. Finally it attempts to move by potentially recalculating its trajectory if it is at the end of a path and then calculating if it should fire on the Nachenblaster with turnips. After everything is completed, it calls dealWithCollisions again.
+ 
+Virtual void sufferCollision() -> Smallgons override the pure virtual sufferCollision function to implement its own way of colliding. If it collides with NachenBlasters or projectiles that are either turnips or torpedoes facing the right direction, it will decrement its health accordingly. At the end, if it is dead, it will increase the player’s score, play the death sound, create a new explosion, and increment the ships destroyed in the level. Otherwise it will just play a blast sound. 
+
+SmoreGon:
+
+
+Constructor -> Obtains the level from the construction parameters and initializes the hit points to 5*(1+(level-1)*(0.1). All other private members are sent to alien using the guidelines specified in the spec. 
+
+Virtual void doSomething(Actor * object) -> Smoregons override the pure virtual doSomething() function. First it checks if it is dead or whether or not it should be dead. Then it calls the StudentWorld’s dealWithCollisions method and checks if it is dead again. Finally it attempts to move by potentially recalculating its trajectory if it is at the end of a path and then calculating two scenarios. Either it should fly straight at the Nachenblaster at increased speed, or it should fire on the Nachenblaster with turnips. If neither of the probabilities are met, the smoregon just moves in a particular direction specified by its flightDirection member. After all the movements are done, it calls dealWithCollision again.
+
+Virtual void sufferCollision(Actor * object) -> Smoregons override the pure virtual sufferCollision function to implement its own way of colliding. If it collides with NachenBlasters or projectiles that are either turnips or torpedoes facing the right direction, it will decrement its health accordingly. At the end, if it is dead, it will increase the player’s score, play the death sound, create a new explosion, and increment the ships destroyed in the level. Moreover, it will generate a random value. If the random value is within the bounds of the probability of goodie drops, it will drop the corresponding goodie.
+ Otherwise it will just play a blast sound. 
+
+SnaggleGon:
+Constructor -> Obtains the level from the construction parameters and initializes the hit points to 10*(1+(level-1)*(0.1). All other private members are sent to alien using the guidelines specified in the spec.
+
+Virtual void doSomething() -> Smoregons override the pure virtual doSomething() function. First it checks if it is dead or whether or not it should be dead. Then it calls the StudentWorld’s dealWithCollisions method and checks if it is dead again. The trajectory is  calculated such that it goes in a zigzag pattern. Then the snagglegon calculates if it should shoot at the Nachenblaster.
+
+Virtual void sufferCollision(Actor * object) -> Smoregons override the pure virtual sufferCollision function to implement its own way of colliding. If it collides with NachenBlasters or projectiles that are either turnips or torpedoes facing the right direction, it will decrement its health accordingly. At the end, if it is dead, it will increase the player’s score, play the death sound, create a new explosion, and increment the ships destroyed in the level. Moreover, it will generate a random value. If the random value is within the bounds of the probability of goodie drops, it will drop a torpedo goodie.
+ Otherwise it will just play a blast sound. 
+
+
+Goodie: 
+Virtual void doSomething()-> I chose not to make this function pure virtual since all goodies do the exact same thing. All move down and to the left.
+
+Virtual void sufferCollision(Actor * object) -> I chose not to make this function pure virtual since all goodies also collide the same way. I dealt with differentiation on the Nachenblaster side. 
+
+
+Projectile:
+Constructor-> requires only one extra thing besides the regular Actor private members, the speed of the projectile which is stored in m_speed. 
+
+Virtual void doSomething() -> I chose to make all projectiles have the same doSomething() function since they all move in the same fashion. All that is different is the speed and direction which I differentiated using magnitude and sign.
+
+Virtual void sufferCollision(Actor * object) = 0 -> Since each projectile handles collisions differently, I chose to make this function pure virtual.
+
+Cabbage:
+Constructor-> calls the projectile constructor with a positive speed. 
+
+Virtual void sufferCollision(Actor * object) -> If the object is an alien, set the state to 0.
+
+Turnip:
+
+Constructor-> calls the projectile constructor with a negative speed. 
+Virtual void sufferCollision(Actor * object) -> If the object is an Nachenblaster, set the state to 0.
+
+F_Torpedo:
+
+Constructor -> speed that is fed into projectile constructor is evaluated using a ternary operator that checks the direction it is constructed with. 
+Virtual void sufferCollision(Actor * object) -> If the object is an alien and the direction is 0 or if the object is nachenblaster and the direction is 180, set the state to 0.
+
+Explosion
+Constructor-> feeds in the information required by actor and initializes private member variable m_ticks to 0.
+Virtual void doSomething() -> overrides actors doSomething to increment the ticks since start, and making the explosion exponentially bigger until the ticks become 4 in which case it is set to dead. 
+
+2. I have implemented all of the functions and they are all working to the best of my knowledge. 
+3. List of assumptions:
+(1) The hitpoints for each of the alien ships are truncated to integers instead of doubles. Although the hitpoints calculation has doubles in it, I chose to use integers to store the hitpoints. This wasn’t specified clearly in the project specification but using the actual official game as a model, level 2+ where it should theoretically take 4 shots instead of 3 if hit points were implemented in doubles, the ships take three shots to die. 
+
+(2) When calculating the probabilities, I assume that 4 decimal digits after the decimal is enough accuracy to simulate a full probability distribution. Therefore, I generated probability numbers using randInt(0, 10000)/10000. 
+
+(3) It was not specified if the ramming and shooting of the Smoregon is supposed to happen at the same time or in separate probabilities(in other words, if the randomly generated number is less than the probability of ramming, ram and shoot, or ram or shoot.) Since ramming and shooting happen at separate times in the actual official game, I decided to implement them separately. 
+(4) Cabbage percentages displayed in the status bar will be truncated to an integer percentage with no decimal points which mirrors the behavior in the actual official game. 
+
+(5) When one last spaceship remains that needs to be destroyed and a collision takes place between the spaceship and the Nachenblaster such that the Nachenblaster dies too, I decided to implement it so that the level doesn’t get passed and the player has to restart the level, which is the way the program is implemented in the official game. 
+
+4. A description of how you tested each of your classes (1-2 paragraphs per class).  
+All base abstract classes were tested indirectly via testing the derived classes. The successful functionality of the derived classes is enough to show that the derived classes work. All sound mechanisms, which are listed at the beginning of the spec, were tested by just producing the scenario in which a particular sound would be triggered, and listening for the sound. 
+
+For the NachenBlaster, I tested the move command by moving the Nachenblaster, using both the arrow and WASD keys. I moved the Nachenblaster across the screen and made sure the NachenBlaster couldn’t move off the screen.  After this worked without issues, I tested out the firing mechanism. I held the cabbage firing mechanism for 20 second intervals whilst moving to make sure the memory allocation would not error out in BAD_EXC. I also changed the spawn rates of the goodies to 100% in order to see if the Nachenblaster would correctly collide with the goodies and get the correct updates. This also includes make sure that firing torpedoes and acquiring torpedoes working. I would also output the hit points of the Nachenblaster after being hit by torpedoes, turnips, or enemy ships to make sure the hitpoint deduction or increment(if it was a goodie) was operating correctly. 
+
+For the stars, I wrote some code that would spawn a star and output its trajectory before it moves off screen. The trajectories were correct. I also printed out the randomly generated doubles that I would use to implement the probability distribution and made sure that the values made sense. Other than that, I counted the number of stars spawned at the beginning and made sure after multiple ticks the number of stars were correctly spawning and spawning at the right numbers.
+
+For the Smallgon, I isolated the smallgon and played the game tick by tick to make sure was (1) moving in the correct pattern and (2) firing turnips at a reasonable rate. This was made sure by some special code that spawned smallgons and tracked their movements via cout. I also made sure that a collision with a Nachenblaster, torpedo, and cabbage would decrement its health in the correct way by playing the game frame by frame while outputting the health of the smallgon. Finally, I tracked the individual members of the smallgon using cout to make sure the values were reasonable(for example, discovering that certain members are ints when they should be doubles). The explosion mechanism that was displayed was compared just by sight comparison. 
+
+For the SmoreGon, I ran the same tests that the Smallgon was run under. However, I also implemented new tests that specifically tested the spawning of goodies when the smallgon died. I changed the probabilities of the spawn rates to see if the probability logic was actually correct and compared the rate of spawn to the rates of the official game. Furthermore, I tested the ramming smoregon functionality by also changing the probability to see if the logic was correct. Each scenario after many trials seem to adhere to the general behavior of the official game so I decided it was correct. 
+
+For the SnaggleGon, I had to output its trajectory separately since it traveled in a zigzag fashion instead of random trajectories. I also made sure that the hitpoint calculations on the snagglegon were correct by outputting the hit points after each collision with a Nachenblaster, torpedo, or cabbage to make sure the hitpoint calculations were reasonable. Finally, I had to keep track of the probabilities to make sure the flatulence torpedoes were firing correctly and at the right times. I outputted the randomly generated numbers and compared them with the actual behavior of the snagglegon to make sure the right/wrong probabilities would generate the corresponding behavior(shoot/not shoot). 
+
+Projectiles in General(Cabbage, Turnip, F_Torpedo):
+
+All projectiles did basically the same thing besides the objects that they were meant to collide with. I outputted the movement data via cout to make sure that each tick moved them the correct amount. Checking the actual collision behavior fell into the same category as checking the collision behavior of the object the projectile hit. On the cabbage side, all I needed to check is whether or not it disappeared from the screen once it collided with a relevant object since that’s all the projectiles handled. The one thing that set the projectiles apart that I had to inspect separately was the direction handling. I had to freeze frame to inspect the rolling patterns for the turnips and cabbages and I had to freeze frame to make sure the torpedoes were going in the right direction.
+
+Goodies in General(Life Goodies, Repair Goodies, and Torpedo Goodies):
+Every goodie inherited the same exact methods. The only difference was the image ID that was assigned to each class. doSomething was checked by outputting the coordinates at every tick to make sure it was moving down and to the left at 1.75 pixels in each direction and sufferCollision was checked by making sure that when the goodie collided with a Nachenblaster, it deconstructed itself immediately. Besides that I just used visual inspection to check if the correct goodie was spawning with the correct behavior. The actual spawning behavior was checked in smoregon and snagglegon, since those were the ones who created them. 
+
+Explosion:
+First I made sure that explosions would occur whenever an Alien ship was destroyed. Then, 
+using side by side comparison, I made sure the animation looked exactly the same as the animation from the official game. Then I outputted the size to the screen to make sure the numbers were reasonable. 
+
+StudentWorld:
+
+Firstly, I have played my own game many many times to make sure there are no BAD_EXC_ERRORs that signify that some object was deconstructed poorly. At the end, to check that everything is deconstructed in the correct way, I output the size of the list to make sure that the list is empty. I also set a breakpoint at the end of init, the first iteration of move, and cleanUp using the xCode debugger to make sure the number of objects and the type of objects inside the actors array are correct. Using the tick by tick functionality, I inspect each action in frames to make sure the status bar is updating correctly and all the different actions are happening in a reasonable way. Finally, make sure that each of the interactions that occurs causes the points in the status bar to be incremented in the correct way. All other interactional mechanisms are tested separately and described in the paragraphs above. 
+
+

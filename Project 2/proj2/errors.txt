@@ -1,0 +1,2 @@
+Errors that aren’t fixed
+-23 messes up formatting(python3python3 comm.py -23 file.txt file2.txt 

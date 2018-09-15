@@ -1,0 +1,48 @@
+
+#include "Map.h"
+#include <string>
+#include <iostream>
+#include <cassert>
+using namespace std;
+
+void test();
+
+int main()
+{
+  test();
+}
+
+
+void test()
+{
+  Map m;
+  Map m2;
+  assert(m.insert("Fred", 2.956)); // Fred is 2.956
+  assert(m.insert("Ethel", 3.538)); // Ethel is 3.538
+  assert(m.size() == 2);
+  ValueType v = 42;
+  assert(!m.get("Lucy", v) && v == 42);
+  assert(m.get("Fred", v) && v == 2.956);
+  v = 42;
+  KeyType x = "Lucy";
+  assert(m.get(0, x, v) && ((x == "Fred"  &&  v == 2.956) || (x == "Ethel"  &&  v == 3.538)));
+  KeyType x2 = "Ricky";
+  assert(m.get(1, x2, v) && ((x2 == "Fred"  &&  v == 2.956) || (x2 == "Ethel"  &&  v == 3.538)) && x != x2);
+  assert(m.contains("Fred") && m.contains("Ethel"));
+  assert(!m.insert("Fred", 0));
+  assert(!m.update("John", 0));
+  assert(m.update("Fred", 2.0) && m.update("Ethel", 3.0)); // Fred is now 2, Ethel is 3
+  assert(m2.insert("Sean", 4.0) && m2.insert("Ryan", 3.5) && m2.insert("Kevin", 1.5)); // Map 2 Sean 4, Ryan 3.5, Kevin 1.5
+  ValueType s = 100;
+  assert(m2.insertOrUpdate("Sean", 1.0) && m2.get("Sean", s) && s == 1); // Sean is now 1
+  assert(m2.insertOrUpdate("Mom", 4.5) && m2.get("Mom", s) && s == 4.5); // Map 2 has Mom at 4.5 now
+  assert(m2.contains("Mom") && m2.contains("Kevin"));
+  s = 100;
+
+  //THE SWAP CHECK
+  //m.swap(m2); <<DOES NOT WORK
+
+  assert(m.erase("Fred") && m.erase("Ethel"));
+  assert(m.empty() && m.size() == 0);
+}
+
